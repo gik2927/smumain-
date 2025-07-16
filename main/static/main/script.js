@@ -1,4 +1,4 @@
-function openSubMenu(key) {
+function openSubMenu(key, event) {
     const subMenu = document.getElementById('subMenu');
     const title = document.getElementById('subMenuTitle');
     const content = document.getElementById('subMenuContent');
@@ -14,7 +14,7 @@ function openSubMenu(key) {
       ] },
       'life': { title: '대학생활', content: '서브 메뉴' },
       'course': { title: '수강신청', content: '서브 메뉴' },
-      'login': { title: '로그인', content: '통합 로그인 연결' },
+      'login': { title: 'LOGIN', content: '통합 로그인 연결' },
       'favorites': { title: '자주 사용하는 메뉴', content: '즐겨찾는 메뉴' }
     };
 
@@ -43,6 +43,17 @@ function closeSubMenu() {
     document.querySelectorAll('.menu-item.active').forEach(item => item.classList.remove('active'));
 }
 
+function handleMenuClick(key, event) {
+  console.log('handleMenuClick:', key);
+  if (key === 'login') {
+    window.open('/login', '_blank');
+  } else if (key === 'logout') {
+    window.location.href = '/logout';
+  } else {
+    openSubMenu(key, event);
+  }
+}
+
 document.addEventListener('click', function(event) {
     const subMenu = document.getElementById('subMenu');
     const sidebar = document.querySelector('.sidebar'); 
@@ -55,8 +66,26 @@ document.addEventListener('click', function(event) {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    const subMenu = document.getElementById('subMenu');
-    if (subMenu.classList.contains('active')) {
-        subMenu.classList.remove('active');
+  const loginMenu = document.querySelector('.menu-item[data-key="login"]');
+  console.log('loginMenu:', loginMenu, 'isLoggedIn:', window.isLoggedIn);
+
+  if (loginMenu) {
+    if (window.isLoggedIn === "true") {
+      loginMenu.textContent = 'LOGOUT';
+      loginMenu.removeAttribute('onclick'); // 기존 onclick 제거
+      loginMenu.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Logout clicked');
+        window.location.href = '/logout';
+      });
+    } else {
+      loginMenu.textContent = 'LOGIN';
+      loginMenu.removeAttribute('onclick');
+      loginMenu.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Login clicked');
+        window.open('/login', '_blank');
+      });
     }
+  }
 });

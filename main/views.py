@@ -1,7 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from django.http import JsonResponse
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import logout as django_logout
 from .models import Notice, Calendar
+from django.contrib import messages
 
 def home(request):
     notices = Notice.objects.order_by('-created_at')[:5]
@@ -52,3 +55,22 @@ def calendar_api(request):
             "end": e.end_date.isoformat() if e.end_date else None
         })
     return JsonResponse(data, safe=False)
+
+def login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            auth_login(request, user)
+            return redirect('home') 
+        else:
+            messages.error(request, '아이디 또는 비밀번호가 올바르지 않습니다.')
+
+    return render(request, 'main/login/login.html')
+
+def logout(request):
+    django_logout(request)
+    return redirect('/')
